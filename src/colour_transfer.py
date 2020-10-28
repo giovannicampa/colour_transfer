@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import colors
 
 from skimage import io, color
 from skimage.filters import threshold_mean
@@ -15,7 +16,7 @@ image_2_norm = np.array(image_2, dtype=np.float64) / 255
 
 
 # How many colours I want to cluster
-nr_clusters = 3
+nr_clusters = 10
 
 def cluster_colours(image, nr_clusters = 5):
     """ Clusters the colours of an image
@@ -65,10 +66,24 @@ labels_2, colors_2 = cluster_colours(image_2_norm, nr_clusters = nr_clusters)
 frequency_1 = [(sum(labels_1 == i)/len(labels_1)) for i in range(nr_clusters)]
 frequency_2 = [(sum(labels_2 == i)/len(labels_2)) for i in range(nr_clusters)]
 
-
 # Sorting the frequencies and
-id_sort_1 = np.argsort(frequency_1)
-id_sort_2 = np.argsort(frequency_2)
+frequency_1_sort = frequency_1.copy()
+id_sort_1 = np.zeros(nr_clusters)
+idx = int(0)
+for _ in range(nr_clusters):
+    f = np.argmax(frequency_1_sort)
+    frequency_1_sort[f] = 0
+    id_sort_1[f] = idx
+    idx += 1
+
+frequency_2_sort = frequency_2.copy()
+id_sort_2 = np.zeros(nr_clusters)
+idx = int(0)
+for _ in range(nr_clusters):
+    f = np.argmax(frequency_2_sort)
+    frequency_2_sort[f] = 0
+    id_sort_2[f] = idx
+    idx += 1
 
 
 # Matching the colours of one picture with the corresponding colour of the other picture by comparing the frequencies
@@ -115,5 +130,5 @@ ax[2,1].axis("off")
 ax[2,0].set_title("Colour transfer")
 ax[2,1].set_title("Colour transfer")
 
-
+plt.tight_layout()
 plt.show()
