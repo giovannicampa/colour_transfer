@@ -7,10 +7,8 @@ from skimage.filters import gaussian
 from sklearn.cluster import KMeans
 
 # Load images
-# image_1 = io.imread("./src/nude-woman-naked-face-and-nude-woman-profile-1906.jpg")
 image_1 = io.imread("./src/kiss_klimt.jpg")
 image_1_norm = np.array(image_1, dtype=np.float64) / 255
-# image_2 = io.imread("./src/the-girls-of-avignon-1907.jpg")
 image_2 = io.imread("./src/lake.jpg")
 image_2_norm = np.array(image_2, dtype=np.float64) / 255
 
@@ -18,6 +16,9 @@ image_2_norm = np.array(image_2, dtype=np.float64) / 255
 # How many colours I want to cluster
 nr_clusters = 10
 
+
+# -----------------------------------------------------------------------
+# Functions
 
 def quantise_image(image, labels, colors):
     """Substitutes the colors of an image with the color of the cluster it belongs to
@@ -45,8 +46,9 @@ def clusterise_image(image, nr_clusters):
     """ Clusters the colours of an image
 
     Return values:
-    - labels: the list of cluster labels for each pixel
+    - labels: list of cluster labels for each pixel
     - colors: list of average colours for each cluster
+    - color_frequency: list with the relative frequencies of each colour
     """
 
     width, height, color_size = image.shape
@@ -74,9 +76,12 @@ def clusterise_image(image, nr_clusters):
 
     return labels, colors, color_frequency
 
+
+# -----------------------------------------------------------------------
+# Processing
+
 labels_1, colors_1, color_frequency_1 = clusterise_image(image_1_norm, nr_clusters)
 labels_2, colors_2, color_frequency_2 = clusterise_image(image_2_norm, nr_clusters)
-
 
 
 # Matching the colours of one picture with the corresponding colour of the other picture by comparing the frequencies
