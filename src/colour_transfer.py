@@ -3,37 +3,20 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 
 from skimage import io, color
-from skimage.filters import threshold_mean
+from skimage.filters import gaussian
 from sklearn.cluster import KMeans
 
 # Load images
 # image_1 = io.imread("./src/nude-woman-naked-face-and-nude-woman-profile-1906.jpg")
-image_1 = io.imread("./src/AYE.jpg")
+image_1 = io.imread("./src/kiss_klimt.jpg")
 image_1_norm = np.array(image_1, dtype=np.float64) / 255
 # image_2 = io.imread("./src/the-girls-of-avignon-1907.jpg")
-image_2 = io.imread("./src/ELL.jpeg")
+image_2 = io.imread("./src/lake.jpg")
 image_2_norm = np.array(image_2, dtype=np.float64) / 255
 
 
 # How many colours I want to cluster
 nr_clusters = 10
-
-def cluster_colours(image, nr_clusters = 5):
-    """ Clusters the colours of an image
-
-    Return values:
-    - labels: the list of cluster labels for each pixel
-    - colors: list of average colours for each cluster
-    """
-
-    width, height, color_size = image.shape
-    image_features = np.reshape(image, (width*height, color_size))
-
-    kmeans = KMeans(n_clusters=nr_clusters, random_state=0).fit(image_features)
-    labels = kmeans.labels_
-    colors = kmeans.cluster_centers_*255
-
-    return labels, colors
 
 
 def quantise_image(image, labels, colors):
@@ -58,53 +41,63 @@ def quantise_image(image, labels, colors):
     return new_image/255
 
 
-# Clustering the colours of the two pictures
-labels_1, colors_1 = cluster_colours(image_1_norm, nr_clusters = nr_clusters)
-labels_2, colors_2 = cluster_colours(image_2_norm, nr_clusters = nr_clusters)
+def clusterise_image(image, nr_clusters):
+    """ Clusters the colours of an image
 
-# Calculating the relative frequency of the cluster colours in each picture
-frequency_1 = [(sum(labels_1 == i)/len(labels_1)) for i in range(nr_clusters)]
-frequency_2 = [(sum(labels_2 == i)/len(labels_2)) for i in range(nr_clusters)]
+    Return values:
+    - labels: the list of cluster labels for each pixel
+    - colors: list of average colours for each cluster
+    """
 
-# Sorting the frequencies and
-frequency_1_sort = frequency_1.copy()
-id_sort_1 = np.zeros(nr_clusters)
-idx = int(0)
-for _ in range(nr_clusters):
-    f = np.argmax(frequency_1_sort)
-    frequency_1_sort[f] = 0
-    id_sort_1[f] = idx
-    idx += 1
+    width, height, color_size = image.shape
+    image_features = np.reshape(image, (width*height, color_size))
 
-frequency_2_sort = frequency_2.copy()
-id_sort_2 = np.zeros(nr_clusters)
-idx = int(0)
-for _ in range(nr_clusters):
-    f = np.argmax(frequency_2_sort)
-    frequency_2_sort[f] = 0
-    id_sort_2[f] = idx
-    idx += 1
+    # Clustering the colours of the two pictures
+    kmeans = KMeans(n_clusters=nr_clusters, random_state=0).fit(image_features)
+    labels = kmeans.labels_
+    colors = kmeans.cluster_centers_*255
+
+
+    # Calculating the relative frequency of the cluster colours in each picture
+    frequency = [(sum(labels == i)/len(labels)) for i in range(nr_clusters)]
+
+
+    # Sorting the frequencies and
+    frequency_sort = frequency.copy()
+    color_frequency = np.zeros(nr_clusters)
+    idx = int(0)
+    for _ in range(nr_clusters):
+        f = np.argmax(frequency_sort)
+        frequency_sort[f] = 0
+        color_frequency[f] = idx
+        idx += 1
+
+    return labels, colors, color_frequency
+
+labels_1, colors_1, color_frequency_1 = clusterise_image(image_1_norm, nr_clusters)
+labels_2, colors_2, color_frequency_2 = clusterise_image(image_2_norm, nr_clusters)
+
 
 
 # Matching the colours of one picture with the corresponding colour of the other picture by comparing the frequencies
 colors_2_in_1 = []
-for id_1 in id_sort_1:
-    colors_2_in_1.append(colors_2[id_sort_2 == id_1])
+for id_1 in color_frequency_1:
+    colors_2_in_1.append(colors_2[color_frequency_2 == id_1])
 
 colors_1_in_2 = []
-for id_2 in id_sort_2:
-    colors_1_in_2.append(colors_1[id_sort_1 == id_2])
+for id_2 in color_frequency_2:
+    colors_1_in_2.append(colors_1[color_frequency_1 == id_2])
 
 
 # -----------------------------------------------------------------------
 # Plotting
 fig, ax = plt.subplots(3,2)
 
-image_1_cstr = quantise_image(image_1_norm, labels_1, colors_1)
-image_2_cstr = quantise_image(image_2_norm, labels_2, colors_2)
+image_1_cstr = gaussian(quantise_image(image_1_norm, labels_1, colors_1))
+image_2_cstr = gaussian(quantise_image(image_2_norm, labels_2, colors_2))
 
-image_1_like_2 = quantise_image(image_1_norm, labels_1, colors_2_in_1)
-image_2_like_1 = quantise_image(image_2_norm, labels_2, colors_1_in_2)
+image_1_like_2 = gaussian(quantise_image(image_1_norm, labels_1, colors_2_in_1))
+image_2_like_1 = gaussian(quantise_image(image_2_norm, labels_2, colors_1_in_2))
 
 # Original picture
 ax[0,0].imshow(image_1)
