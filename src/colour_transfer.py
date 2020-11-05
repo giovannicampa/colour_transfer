@@ -107,11 +107,11 @@ for id_2 in color_frequency_2:
 # - Plotting
 fig, ax = plt.subplots(3,2)
 
-image_1_cstr = gaussian(quantise_image(image_1_norm, labels_1, colors_1), sigma = 3, multichannel=True)
-image_2_cstr = gaussian(quantise_image(image_2_norm, labels_2, colors_2), sigma = 3, multichannel=True)
+image_1_cstr = gaussian(quantise_image(image_1_norm, labels_1, colors_1), sigma = 2, multichannel=True)
+image_2_cstr = gaussian(quantise_image(image_2_norm, labels_2, colors_2), sigma = 2, multichannel=True)
 
-image_1_like_2 = gaussian(quantise_image(image_1_norm, labels_1, colors_2_in_1), sigma = 3, multichannel=True)
-image_2_like_1 = gaussian(quantise_image(image_2_norm, labels_2, colors_1_in_2), sigma = 3, multichannel=True)
+image_1_like_2 = gaussian(quantise_image(image_1_norm, labels_1, colors_2_in_1), sigma = 2, multichannel=True)
+image_2_like_1 = gaussian(quantise_image(image_2_norm, labels_2, colors_1_in_2), sigma = 2, multichannel=True)
 
 # Original picture
 ax[0,0].imshow(image_1)
