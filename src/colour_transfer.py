@@ -1,3 +1,5 @@
+from concurrent.futures import ProcessPoolExecutor
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
@@ -6,19 +8,13 @@ from skimage import io, color
 from skimage.filters import gaussian
 from sklearn.cluster import KMeans
 
-# Load images
-image_1 = io.imread("./src/kiss_klimt.jpg")
-image_1_norm = np.array(image_1, dtype=np.float64) / 255
-image_2 = io.imread("./src/lake.jpg")
-image_2_norm = np.array(image_2, dtype=np.float64) / 255
-
 
 # How many colours I want to cluster
 nr_clusters = 10
 
 
 # -----------------------------------------------------------------------
-# Functions
+# - Functions
 
 def quantise_image(image, labels, colors):
     """Substitutes the colors of an image with the color of the cluster it belongs to
@@ -78,10 +74,23 @@ def clusterise_image(image, nr_clusters):
 
 
 # -----------------------------------------------------------------------
-# Processing
+# - Load images
 
-labels_1, colors_1, color_frequency_1 = clusterise_image(image_1_norm, nr_clusters)
-labels_2, colors_2, color_frequency_2 = clusterise_image(image_2_norm, nr_clusters)
+image_1 = io.imread("./src/kiss_klimt.jpg")
+image_1_norm = np.array(image_1, dtype=np.float64) / 255
+image_2 = io.imread("./src/lake.jpg")
+image_2_norm = np.array(image_2, dtype=np.float64) / 255
+
+
+# -----------------------------------------------------------------------
+# - Processing
+
+# The two images are processed in paralled
+with ProcessPoolExecutor() as executor:
+    e1 = executor.submit(clusterise_image, image_1_norm, nr_clusters)
+    e2 = executor.submit(clusterise_image, image_2_norm, nr_clusters)
+    labels_1, colors_1, color_frequency_1 = e1.result()
+    labels_2, colors_2, color_frequency_2 = e2.result()
 
 
 # Matching the colours of one picture with the corresponding colour of the other picture by comparing the frequencies
@@ -95,7 +104,7 @@ for id_2 in color_frequency_2:
 
 
 # -----------------------------------------------------------------------
-# Plotting
+# - Plotting
 fig, ax = plt.subplots(3,2)
 
 image_1_cstr = gaussian(quantise_image(image_1_norm, labels_1, colors_1))
