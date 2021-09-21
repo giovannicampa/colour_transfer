@@ -1,13 +1,10 @@
 from concurrent.futures import ProcessPoolExecutor
 
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import colors
-
-from skimage import io, color
+import numpy as np
+from skimage import io
 from skimage.filters import gaussian
 from sklearn.cluster import KMeans
-
 
 # How many colours I want to cluster
 nr_clusters = 10
