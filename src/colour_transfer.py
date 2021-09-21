@@ -11,9 +11,6 @@ from sklearn.cluster import KMeans
 COLOR_NORMALISATION_CONSTANT = 255
 
 
-# -----------------------------------------------------------------------
-# - Functions
-
 class ColorTransfer:
 
     def __init__(self, nr_clusters: int):
@@ -92,10 +89,7 @@ class ColorTransfer:
         return labels, colors, color_frequency
 
 
-    # -----------------------------------------------------------------------
-    # - Load images
-
-    def read_image(self): #, path_image_1: str, path_image_2: str):
+    def read_image(self, path_image_1: str, path_image_2: str):
         """Read images from paths
 
         Args:
@@ -103,14 +97,11 @@ class ColorTransfer:
             path_image_2: path of the second image
         """
 
-        self.image_1 = io.imread("./src/kiss_klimt.jpg")
+        self.image_1 = io.imread(path_image_1)
         self.image_1_norm = np.array(self.image_1, dtype=np.float64) / COLOR_NORMALISATION_CONSTANT
-        self.image_2 = io.imread("./src/lake.jpg")
+        self.image_2 = io.imread(path_image_2)
         self.image_2_norm = np.array(self.image_2, dtype=np.float64) / COLOR_NORMALISATION_CONSTANT
 
-
-    # -----------------------------------------------------------------------
-    # - Processing
 
     def process_images(self):
         """Groups and swaps the colors of two images simulatneously
@@ -133,9 +124,6 @@ class ColorTransfer:
         for id_2 in color_frequency_2:
             self.colors_1_in_2.append(self.colors_1[color_frequency_1 == id_2])
 
-
-    # -----------------------------------------------------------------------
-    # - Plotting
 
     def plot_image(self):
         """Plots the processed images and the originals
@@ -179,6 +167,6 @@ class ColorTransfer:
 
 if __name__ == "__main__":
     color_transfer = ColorTransfer(nr_clusters = 10)
-    color_transfer.read_image()
+    color_transfer.read_image(path_image_1 = "./src/kiss_klimt.jpg", path_image_2 = "./src/lake.jpg")
     color_transfer.process_images()
     color_transfer.plot_image()
