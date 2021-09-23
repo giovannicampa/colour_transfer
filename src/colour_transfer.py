@@ -125,17 +125,18 @@ class ColorTransfer:
             self.colors_1_in_2.append(self.colors_1[color_frequency_1 == id_2])
 
 
+        self.image_1_cstr = gaussian(self.quantise_image(self.image_1_norm, self.labels_1, self.colors_1), sigma = 2, multichannel=True)
+        self.image_2_cstr = gaussian(self.quantise_image(self.image_2_norm, self.labels_2, self.colors_2), sigma = 2, multichannel=True)
+
+        self.image_1_like_2 = gaussian(self.quantise_image(self.image_1_norm, self.labels_1, self.colors_2_in_1), sigma = 2, multichannel=True)
+        self.image_2_like_1 = gaussian(self.quantise_image(self.image_2_norm, self.labels_2, self.colors_1_in_2), sigma = 2, multichannel=True)
+
+
     def plot_image(self):
         """Plots the processed images and the originals
         """
 
         fig, ax = plt.subplots(3,2)
-
-        image_1_cstr = gaussian(self.quantise_image(self.image_1_norm, self.labels_1, self.colors_1), sigma = 2, multichannel=True)
-        image_2_cstr = gaussian(self.quantise_image(self.image_2_norm, self.labels_2, self.colors_2), sigma = 2, multichannel=True)
-
-        image_1_like_2 = gaussian(self.quantise_image(self.image_1_norm, self.labels_1, self.colors_2_in_1), sigma = 2, multichannel=True)
-        image_2_like_1 = gaussian(self.quantise_image(self.image_2_norm, self.labels_2, self.colors_1_in_2), sigma = 2, multichannel=True)
 
         # Original picture
         ax[0,0].imshow(self.image_1)
@@ -146,16 +147,16 @@ class ColorTransfer:
         ax[0,1].set_title("Original")
 
         # Original picture with quantised colours
-        ax[1,0].imshow(image_1_cstr)
-        ax[1,1].imshow(image_2_cstr)
+        ax[1,0].imshow(self.image_1_cstr)
+        ax[1,1].imshow(self.image_2_cstr)
         ax[1,0].axis("off")
         ax[1,1].axis("off")
         ax[1,0].set_title("Colour quantisation")
         ax[1,1].set_title("Colour quantisation")
 
         # Picture with swapped colours
-        ax[2,0].imshow(image_1_like_2)
-        ax[2,1].imshow(image_2_like_1)
+        ax[2,0].imshow(self.image_1_like_2)
+        ax[2,1].imshow(self.image_2_like_1)
         ax[2,0].axis("off")
         ax[2,1].axis("off")
         ax[2,0].set_title("Colour transfer")
