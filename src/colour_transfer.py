@@ -27,12 +27,12 @@ class ColorTransfer:
         """Substitutes the colors of an image with the color of the cluster it belongs to
         
         Args:
-            image:
-            labels:
-            colors:
+            image: image to be quantised
+            labels: color-cluster id to which each pixel belongs
+            colors: RGB code of the cluster
 
         Returns:
-            quantised picture
+            quantised picture (np.ndarray): image that has only the colors of the clusters
         """
 
         width,height,col = image.shape
@@ -59,7 +59,7 @@ class ColorTransfer:
 
         Returns:
             labels (list): list of cluster labels for each pixel
-            colors (list): list of average colours for each cluster
+            colors (list): RGB colour code for each cluster
             color_frequency (list): list with the relative frequencies of each colour
         """
 
@@ -105,6 +105,10 @@ class ColorTransfer:
 
     def process_images(self):
         """Groups and swaps the colors of two images simulatneously
+
+        Returns:
+            image_1_like_2 (np.ndarray): image 1 with the colours of image 2
+            image_2_like_1 (np.ndarray): image 2 with the colours of image 1
         """
 
         # The two images are processed in paralled
@@ -124,19 +128,21 @@ class ColorTransfer:
         for id_2 in color_frequency_2:
             self.colors_1_in_2.append(self.colors_1[color_frequency_1 == id_2])
 
+        image_1_like_2 = gaussian(self.quantise_image(self.image_1_norm, self.labels_1, self.colors_2_in_1), sigma = 2, multichannel=True)
+        image_2_like_1 = gaussian(self.quantise_image(self.image_2_norm, self.labels_2, self.colors_1_in_2), sigma = 2, multichannel=True)
 
-        self.image_1_cstr = gaussian(self.quantise_image(self.image_1_norm, self.labels_1, self.colors_1), sigma = 2, multichannel=True)
-        self.image_2_cstr = gaussian(self.quantise_image(self.image_2_norm, self.labels_2, self.colors_2), sigma = 2, multichannel=True)
-
-        self.image_1_like_2 = gaussian(self.quantise_image(self.image_1_norm, self.labels_1, self.colors_2_in_1), sigma = 2, multichannel=True)
-        self.image_2_like_1 = gaussian(self.quantise_image(self.image_2_norm, self.labels_2, self.colors_1_in_2), sigma = 2, multichannel=True)
+        return image_1_like_2, image_2_like_1
 
 
-    def plot_image(self):
+    def plot_image(self, image_1_like_2, image_2_like_1):
         """Plots the processed images and the originals
         """
 
         fig, ax = plt.subplots(3,2)
+
+        # Smooth clustered image
+        image_1_clustered = gaussian(self.quantise_image(self.image_1_norm, self.labels_1, self.colors_1), sigma = 2, multichannel=True)
+        image_2_clustered = gaussian(self.quantise_image(self.image_2_norm, self.labels_2, self.colors_2), sigma = 2, multichannel=True)
 
         # Original picture
         ax[0,0].imshow(self.image_1)
@@ -147,16 +153,16 @@ class ColorTransfer:
         ax[0,1].set_title("Original")
 
         # Original picture with quantised colours
-        ax[1,0].imshow(self.image_1_cstr)
-        ax[1,1].imshow(self.image_2_cstr)
+        ax[1,0].imshow(image_1_clustered)
+        ax[1,1].imshow(image_2_clustered)
         ax[1,0].axis("off")
         ax[1,1].axis("off")
         ax[1,0].set_title("Colour quantisation")
         ax[1,1].set_title("Colour quantisation")
 
         # Picture with swapped colours
-        ax[2,0].imshow(self.image_1_like_2)
-        ax[2,1].imshow(self.image_2_like_1)
+        ax[2,0].imshow(image_1_like_2)
+        ax[2,1].imshow(image_2_like_1)
         ax[2,0].axis("off")
         ax[2,1].axis("off")
         ax[2,0].set_title("Colour transfer")
@@ -168,6 +174,6 @@ class ColorTransfer:
 
 if __name__ == "__main__":
     color_transfer = ColorTransfer(nr_clusters = 10)
-    color_transfer.read_image(path_image_1 = "./src/kiss_klimt.jpg", path_image_2 = "./src/lake.jpg")
-    color_transfer.process_images()
-    color_transfer.plot_image()
+    color_transfer.read_image(path_image_1 = "src/kiss_klimt.jpg", path_image_2 = "src/lake.jpg")
+    image_1_like_2, image_2_like_1 = color_transfer.process_images()
+    color_transfer.plot_image(image_1_like_2, image_2_like_1)
