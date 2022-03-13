@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 
 from concurrent.futures import ProcessPoolExecutor
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -51,16 +52,16 @@ class ColorTransfer:
         return new_image/COLOR_NORMALISATION_CONSTANT
 
 
-    def clusterise_image(self, image: np.ndarray):
+    def clusterise_image(self, image: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Clusters the colours of an image
 
         Args:
             image: image whose colours have to be grouped
 
         Returns:
-            labels (list): list of cluster labels for each pixel
-            colors (list): RGB colour code for each cluster
-            color_frequency (list): list with the relative frequencies of each colour
+            labels: list of cluster labels for each pixel
+            colors: RGB colour code for each cluster
+            color_frequency: list with the relative frequencies of each colour
         """
 
         width, height, color_size = image.shape
@@ -103,12 +104,12 @@ class ColorTransfer:
         self.image_2_norm = np.array(self.image_2, dtype=np.float64) / COLOR_NORMALISATION_CONSTANT
 
 
-    def process_images(self):
+    def process_images(self) -> Tuple[np.ndarray, np.ndarray]:
         """Groups and swaps the colors of two images simulatneously
 
         Returns:
-            image_1_like_2 (np.ndarray): image 1 with the colours of image 2
-            image_2_like_1 (np.ndarray): image 2 with the colours of image 1
+            image_1_like_2: image 1 with the colours of image 2
+            image_2_like_1: image 2 with the colours of image 1
         """
 
         # The two images are processed in paralled
@@ -134,7 +135,7 @@ class ColorTransfer:
         return image_1_like_2, image_2_like_1
 
 
-    def plot_image(self, image_1_like_2, image_2_like_1):
+    def plot_image(self, image_1_like_2: np.ndarray, image_2_like_1: np.ndarray):
         """Plots the processed images and the originals
         """
 
