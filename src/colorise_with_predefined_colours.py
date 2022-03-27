@@ -3,6 +3,7 @@ import numpy as np
 import json
 import matplotlib.pyplot as plt
 import argparse
+import colorsys
 
 DISTANCE_COLORS_MAX = 1E9
 NR_COMBINATIONS = 348
@@ -72,8 +73,15 @@ def colorize_image_all_combinations():
         
         if len(colors) < nr_color_combinations: continue
 
+        if args.color_method == "hsv":
+            colors = [np.array(colorsys.rgb_to_hsv(*color)) for color in colors]
+            colors_original = [np.array(colorsys.rgb_to_hsv(*color)) for color in colors_original]
+
         # Sort colors by method
         colors_new = sort_colors_local_min(colors_original, colors, distance_function)
+
+        if args.color_method == "hsv":
+            colors_new = [np.array(colorsys.hsv_to_rgb(*color)) for color in colors_new]
 
         image_quantized = coloriser.quantise_image(image_norm, labels, colors_new)
 
@@ -86,6 +94,7 @@ def parse_arguments():
     parser.add_argument("-n", "--nr_colors", help="How many colors have to be clustered.", type=int, default=4)
     parser.add_argument("-i", "--input_path", help="Path to input image", type=str, default="/home/giovanni/Downloads/giovanno.jpeg")
     parser.add_argument("-o", "--output_path", help="Path to save path", type=str)
+    parser.add_argument("-c", "--color_method", help="Whether to use HSV or RGB", type=str, default="hsv")
     args = parser.parse_args()
     return args
 
