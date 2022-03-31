@@ -90,18 +90,32 @@ class ColorTransfer:
         return labels, colors, color_frequency
 
 
-    def read_image(self, path_image_1: str, path_image_2: str):
-        """Read images from paths
+    def read_images(self, path_image_1: str, path_image_2: str):
+        """Read images from paths and add to arguments
 
         Args:
             path_image_1: path of the first image
             path_image_2: path of the second image
         """
 
-        self.image_1 = io.imread(path_image_1)
-        self.image_1_norm = np.array(self.image_1, dtype=np.float64) / COLOR_NORMALISATION_CONSTANT
-        self.image_2 = io.imread(path_image_2)
-        self.image_2_norm = np.array(self.image_2, dtype=np.float64) / COLOR_NORMALISATION_CONSTANT
+        self.image_1, self.image_1_norm = self.read_image(path_image_1)
+        self.image_2, self.image_2_norm = self.read_image(path_image_2)
+
+
+    def read_image(self, path_image: str) -> Tuple[np.ndarray, np.ndarray]:
+        """Read single image from path
+
+        Args:
+            path_image: path to image
+
+        Returns:
+            image: picture with colors encoded in range [0,255]
+            image_norm: picture with colors encoded in range [0,1]
+        """
+
+        image = io.imread(path_image)
+        image_norm = np.array(image, dtype=np.float64) / COLOR_NORMALISATION_CONSTANT
+        return image, image_norm
 
 
     def process_images(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -175,6 +189,6 @@ class ColorTransfer:
 
 if __name__ == "__main__":
     color_transfer = ColorTransfer(nr_clusters = 10)
-    color_transfer.read_image(path_image_1 = "src/kiss_klimt.jpg", path_image_2 = "src/lake.jpg")
+    color_transfer.read_images(path_image_1 = "src/kiss_klimt.jpg", path_image_2 = "src/lake.jpg")
     image_1_like_2, image_2_like_1 = color_transfer.process_images()
     color_transfer.plot_image(image_1_like_2, image_2_like_1)
