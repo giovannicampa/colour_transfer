@@ -8,6 +8,9 @@ from scipy.optimize import linear_sum_assignment
 
 DISTANCE_COLORS_MAX = 1E9
 NR_COMBINATIONS = 348
+INDEX_HUE = 0
+INDEX_SATURATION = 1
+INDICES_HS = [INDEX_HUE, INDEX_SATURATION]
 
 def sort_colors_local_min(colors_original: list, colors_new: list, distance_function) -> list:
     """
@@ -22,7 +25,7 @@ def sort_colors_local_min(colors_original: list, colors_new: list, distance_func
         colors_original: colors of the original image
         colors_new: new colors that have to be applied
         distance_function: function that calculates the distance between two colors values
-    
+
     Returns:
         colors_new_sorted: the new color values
     """
@@ -62,7 +65,7 @@ def sort_colors_global_min(colors_original: list, colors_new: list, distance_fun
         colors_original: colors of the original image
         colors_new: new colors that have to be applied
         distance_function: function that calculates the distance between two colors values
-    
+
     Returns:
         colors_new_sorted: the new color values
     """
@@ -75,7 +78,7 @@ def sort_colors_global_min(colors_original: list, colors_new: list, distance_fun
         
         for j, color_new in enumerate(colors_new):
 
-            distance_between_colors[i,j] = distance_function(color_new[0:2] - color_original[0:2])
+            distance_between_colors[i,j] = distance_function(color_new[INDICES_HS] - color_original[INDICES_HS])
 
     _, rows = linear_sum_assignment(distance_between_colors)
 
@@ -94,9 +97,9 @@ def colorize_image_all_combinations():
     distance_function = np.linalg.norm
 
     # Function that sorts the colors
-    if args.method == "local":
+    if args.sort_method == "local":
         sort_colors_function = sort_colors_local_min
-    elif args.method == "global":
+    elif args.sort_method == "global":
         sort_colors_function = sort_colors_global_min
 
     coloriser = ColorTransfer(nr_clusters=nr_color_combinations)
@@ -140,6 +143,7 @@ def parse_arguments():
     parser.add_argument("-i", "--input_path", help="Path to input image", type=str, default="/home/giovanni/Downloads/giovanno.jpeg")
     parser.add_argument("-o", "--output_path", help="Path to save path", type=str)
     parser.add_argument("-c", "--color_method", help="Whether to use HSV or RGB", type=str, default="hsv")
+    parser.add_argument("-s", "--sort_method", help="What method to use for sorting colors [local, global]", type=str, default="global")
     args = parser.parse_args()
     return args
 
